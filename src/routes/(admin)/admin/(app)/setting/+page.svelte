@@ -1,12 +1,18 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import ChangePassword from "$lib/components/admin/ChangePassword.svelte";
   import { themeStore } from "$lib/stores/theme.svelte.js";
 
   const theme = $derived(themeStore.current.toLowerCase() as "light" | "dark" | "system");
   let language = $state("English");
   let notifications = $state(true);
   let twoFactor = $state(false);
+  let isChangePasswordOpen = $state(false);
 </script>
+
+<svelte:head>
+  <title>Settings — BamanStock</title>
+</svelte:head>
 
 <div class="space-y-6">
   <div>
@@ -108,7 +114,11 @@
             <p class="text-xs text-muted-foreground">Update your admin password</p>
           </div>
         </div>
-        <button class="px-4 py-2 text-sm font-medium border border-border rounded-lg text-foreground hover:bg-muted transition-colors">
+        <button
+          type="button"
+          onclick={() => (isChangePasswordOpen = true)}
+          class="px-4 py-2 text-sm font-medium border border-border rounded-lg text-foreground hover:bg-muted transition-colors"
+        >
           Change
         </button>
       </div>
@@ -172,3 +182,5 @@
     </div>
   </div>
 </div>
+
+<ChangePassword bind:isOpen={isChangePasswordOpen} />

@@ -45,6 +45,10 @@
   ]);
 </script>
 
+<svelte:head>
+  <title>Activity Log — BamanStock</title>
+</svelte:head>
+
 <div class="p-8 space-y-6" in:fade>
   <div class="flex items-center justify-between mb-8">
     <h2 class="text-xl font-bold text-foreground">Activity Log</h2>

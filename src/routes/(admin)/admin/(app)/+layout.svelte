@@ -1,5 +1,4 @@
 <script lang="ts">
-  import "../../../app.css";
   import {
     Sidebar,
     SidebarContent,
@@ -16,14 +15,27 @@
   } from "$lib/components/ui/sidebar/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
   import { themeStore } from "$lib/stores/theme.svelte.js";
+  import { authStore } from "$lib/stores/auth.svelte.js";
+  import { useAdminProfile } from "$lib/stores/profile.svelte.js";
 
   let { children } = $props();
 
   $effect(() => { themeStore.init(); });
 
+  const profile = useAdminProfile();
+  let loggingOut = $state(false);
+
   function toggleTheme() {
     themeStore.set(themeStore.current === "Dark" ? "Light" : "Dark");
+  }
+
+  async function handleLogout() {
+    if (loggingOut) return;
+    loggingOut = true;
+    authStore.logout();
+    await goto("/admin/login", { replaceState: true });
   }
 
   const adminNavigation = [
@@ -70,10 +82,15 @@
       </SidebarContent>
 
       <SidebarFooter class="p-4">
-        <a href="/logout" class="flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-900/20 rounded-lg transition-colors">
+        <button
+          type="button"
+          onclick={handleLogout}
+          disabled={loggingOut}
+          class="w-full flex items-center gap-3 px-4 py-3 text-rose-500 hover:bg-rose-900/20 rounded-lg transition-colors disabled:opacity-60"
+        >
           <Icon iconName="icon/log-out" size={20} />
-          <span class="font-medium">Logout</span>
-        </a>
+          <span class="font-medium">{loggingOut ? "Logging out..." : "Logout"}</span>
+        </button>
       </SidebarFooter>
     </Sidebar>
 
@@ -112,8 +129,25 @@
             <span class="text-[7px] font-bold text-white leading-none">EN</span>
           </div>
 
-          <div class="w-9 h-9 rounded-full bg-info/10 border-2 border-border flex items-center justify-center">
-            <Icon iconName="icon/user" size={18} class="text-info" />
+          <div class="flex items-center gap-3 pl-2 pr-1">
+            <div class="hidden sm:block text-right leading-tight">
+              <p class="text-sm font-bold text-foreground truncate max-w-[160px]">
+                {profile.name || 'Administrator'}
+              </p>
+              <p class="text-[11px] font-medium text-muted-foreground truncate max-w-[160px]">
+                {authStore.user?.role ?? ''}
+              </p>
+            </div>
+            <div
+              class="w-9 h-9 rounded-full bg-info/10 border-2 border-border flex items-center justify-center overflow-hidden shrink-0"
+              title={profile.email || profile.name}
+            >
+              {#if profile.avatar}
+                <img src={profile.avatar} alt={profile.name} class="w-full h-full object-cover" />
+              {:else}
+                <span class="text-xs font-bold text-info">{profile.initials}</span>
+              {/if}
+            </div>
           </div>
         </div>
       </header>

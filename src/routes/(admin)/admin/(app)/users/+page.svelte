@@ -1,8 +1,8 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
   import { fade } from 'svelte/transition';
-  import ResetPassword from "../../../../lib/components/admin/ResetPassword.svelte";
-  import SuspendUser from "../../../../lib/components/admin/SuspendUser.svelte";
+  import ResetPassword from "$lib/components/admin/ResetPassword.svelte";
+  import SuspendUser from "$lib/components/admin/SuspendUser.svelte";
 
   let activeTab = $state("Investors");
   let selectedUser = $state<any>(null);
@@ -47,6 +47,10 @@
     isSuspendModalOpen = false;
   }
 </script>
+
+<svelte:head>
+  <title>Users — BamanStock</title>
+</svelte:head>
 
 {#if !selectedUser}
   <div class="space-y-6" in:fade>
