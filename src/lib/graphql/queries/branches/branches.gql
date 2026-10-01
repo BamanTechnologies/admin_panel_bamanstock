@@ -1,0 +1,39 @@
+query investorLocations(
+  $limit: Int
+  $offset: Int
+  $filter: branches_bool_exp
+  $order: [branches_order_by!]!
+  $stocksFilter: stock_bool_exp = {}
+) {
+  branches(limit: $limit, offset: $offset, where: $filter, order_by: $order) {
+    id
+    name
+    address
+    company: companyByCompany {
+      id
+      name
+    }
+    total_customers: company_customers_aggregate {
+      aggregate {
+        count
+      }
+    }
+    stock_value: stocks_aggregate(where: $stocksFilter) {
+      aggregate {
+        sum {
+          selling_price
+        }
+      }
+    }
+    merchants: merchants_aggregate {
+      aggregate {
+        count
+      }
+    }
+  }
+  total: branches_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

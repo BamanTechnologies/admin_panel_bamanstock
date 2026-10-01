@@ -106,7 +106,7 @@
       </div>
       <div>
         <h1 class="text-2xl font-bold text-foreground">BamanStock</h1>
-        <p class="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+        <p class="text-xs font-medium capitalize text-muted-foreground">
           Admin Portal
         </p>
       </div>
