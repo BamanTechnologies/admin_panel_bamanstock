@@ -1,0 +1,8 @@
+mutation bulkToggleActivation($ids: [uuid!]!, $toggle: Boolean!) {
+  update_account_users(
+    where: { id: { _in: $ids } }
+    _set: { is_active: $toggle }
+  ) {
+    affected_rows
+  }
+}

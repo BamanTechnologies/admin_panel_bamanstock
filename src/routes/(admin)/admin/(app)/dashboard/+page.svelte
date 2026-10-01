@@ -16,6 +16,10 @@
   ];
 </script>
 
+<svelte:head>
+  <title>Dashboard — BamanStock</title>
+</svelte:head>
+
 <div class="space-y-6 p-2">
   <div class="flex items-center justify-between mb-8">
     <h2 class="text-2xl font-semibold text-foreground">Welcome, Alex</h2>

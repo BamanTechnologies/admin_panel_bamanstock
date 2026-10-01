@@ -1,0 +1,42 @@
+query getCompanies($id: uuid!) {
+  companies_by_pk(id: $id) {
+    id
+    name
+    license
+    tin_number
+    created_at
+    updated_at
+    branches_aggregate {
+      aggregate {
+        count
+      }
+    }
+    company_investors_aggregate {
+      aggregate {
+        count
+      }
+    }
+    company_customers_aggregate {
+      aggregate {
+        count
+      }
+    }
+    company_investors {
+      investorByInvestor {
+        id
+        first_name
+        last_name
+        phone_number
+        user_id
+      }
+    }
+    company_customers {
+      customerByCustomer {
+        id
+        first_name
+        last_name
+        phone_number
+      }
+    }
+  }
+}

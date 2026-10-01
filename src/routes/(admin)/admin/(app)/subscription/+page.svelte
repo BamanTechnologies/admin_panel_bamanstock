@@ -23,6 +23,10 @@
 
 </script>
 
+<svelte:head>
+  <title>Subscription — BamanStock</title>
+</svelte:head>
+
 <div class="space-y-6" in:fade>
   <div class="flex items-center justify-between">
     <h2 class="text-2xl font-bold text-foreground">Subscription Plan</h2>
