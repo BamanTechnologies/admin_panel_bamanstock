@@ -10,7 +10,7 @@
   import CUSTOMERS from "$graphql/queries/selector/customers.gql";
 
   type SelectItem = Record<string, any>;
-  type Option = { id: string; label: string };
+  type Option = { id: string; label: string; status?: boolean };
   type CompanyRow = {
     id: string;
     name: string;
@@ -91,6 +91,7 @@ const result = await getAdminClient().query<{
       selectedInvestors = (row.company_investors ?? []).map((r) => ({
         id: r.investorByInvestor.id,
         label: personLabel(r.investorByInvestor),
+        status: r.investorByInvestor.user_id != null,
       }));
       selectedCustomers = (row.company_customers ?? []).map((r) => ({
         id: r.customerByCustomer.id,
@@ -261,6 +262,7 @@ const result = await getAdminClient().query<{
             displayLabel={personLabel}
             valueKey="id"
             placeholder="Search investors to attach..."
+            statusKey="user_id"
             bind:selected={selectedInvestors}
           />
         </div>

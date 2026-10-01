@@ -27,6 +27,7 @@ query getCompanies($id: uuid!) {
         first_name
         last_name
         phone_number
+        user_id
       }
     }
     company_customers {

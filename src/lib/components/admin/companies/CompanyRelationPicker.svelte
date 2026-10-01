@@ -4,7 +4,7 @@
   import { getAdminClient } from "$graphql/client";
 
   type SelectItem = Record<string, any>;
-  type Option = { id: string; label: string };
+  type Option = { id: string; label: string; status?: boolean };
 
   let {
     query,
@@ -13,6 +13,7 @@
     displayLabel = (item: SelectItem) => `${item.first_name ?? ""} ${item.last_name ?? ""}`.trim(),
     valueKey = "id",
     placeholder = "Search and select...",
+    statusKey = "",
     selected = $bindable([] as Option[]),
   }: {
     query: DocumentNode;
@@ -21,6 +22,7 @@
     displayLabel?: (item: SelectItem) => string;
     valueKey?: string;
     placeholder?: string;
+    statusKey?: string;
     selected?: Option[];
   } = $props();
 
@@ -84,7 +86,14 @@
     if (isSelected(id)) {
       selected = selected.filter((o) => o.id !== id);
     } else {
-      selected = [...selected, { id, label: displayLabel(item) }];
+      selected = [
+        ...selected,
+        {
+          id,
+          label: displayLabel(item),
+          status: statusKey ? Boolean(item[statusKey]) : undefined,
+        },
+      ];
     }
   }
 
@@ -98,6 +107,12 @@
     <div class="flex flex-wrap gap-1.5 mb-1.5">
       {#each selected as option}
         <span class="inline-flex items-center gap-1 rounded-full bg-info/10 text-info px-2.5 py-1 text-xs font-medium">
+          {#if typeof option.status === "boolean"}
+            <span
+              class="size-1.5 rounded-full {option.status ? 'bg-emerald-500' : 'bg-muted-foreground'}"
+              aria-hidden="true"
+            ></span>
+          {/if}
           {option.label}
           <button
             type="button"
@@ -151,7 +166,20 @@
             onclick={() => { toggle(item); searchText = ""; }}
             class="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors cursor-pointer flex items-center justify-between gap-2"
           >
-            <span class="flex-1">{displayLabel(item)}</span>
+            <span class="flex items-center gap-2 flex-1 min-w-0">
+              <span class="truncate">{displayLabel(item)}</span>
+              {#if statusKey}
+                {#if item[statusKey]}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap">
+                    <Icon iconName="icon/check-circle" size={11} /> Active
+                  </span>
+                {:else}
+                  <span class="inline-flex items-center gap-1 rounded-full bg-muted text-muted-foreground px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap">
+                    <Icon iconName="icon/user-minus" size={11} /> Inactive
+                  </span>
+                {/if}
+              {/if}
+            </span>
             {#if isSelected(item[valueKey])}
               <Icon iconName="icon/check" size={14} class="text-info shrink-0" />
             {/if}
