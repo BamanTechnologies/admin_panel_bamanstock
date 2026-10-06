@@ -1,6 +1,7 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
   import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
   import { fade } from "svelte/transition";
   import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import CompanyForm from "$lib/components/admin/companies/CompanyForm.svelte";
@@ -339,6 +340,13 @@ function buildFilter(): Record<string, unknown> {
               </td>
               <td class="px-6 py-4 text-muted-foreground">{formatDate(c.created_at)}</td>
               <td class="px-6 py-4 text-right">
+                <button
+                  title="View"
+                  onclick={() => goto(`/admin/companies/${c.id}`)}
+                  class="p-1.5 text-muted-foreground hover:text-blue-500"
+                >
+                  <Icon iconName="icon/eye" size={16} />
+                </button>
                 <button
                   title="Edit"
                   onclick={() => openEdit(c)}
