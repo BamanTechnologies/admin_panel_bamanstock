@@ -14,6 +14,7 @@
     valueKey = "id",
     placeholder = "Search and select...",
     statusKey = "",
+    single = false,
     selected = $bindable([] as Option[]),
   }: {
     query: DocumentNode;
@@ -23,6 +24,7 @@
     valueKey?: string;
     placeholder?: string;
     statusKey?: string;
+    single?: boolean;
     selected?: Option[];
   } = $props();
 
@@ -83,17 +85,23 @@
 
   function toggle(item: SelectItem) {
     const id = item[valueKey];
+    const option = {
+      id,
+      label: displayLabel(item),
+      status: statusKey ? Boolean(item[statusKey]) : undefined,
+    };
+    if (single) {
+      if (isSelected(id)) {
+        selected = [];
+      } else {
+        selected = [option];
+      }
+      return;
+    }
     if (isSelected(id)) {
       selected = selected.filter((o) => o.id !== id);
     } else {
-      selected = [
-        ...selected,
-        {
-          id,
-          label: displayLabel(item),
-          status: statusKey ? Boolean(item[statusKey]) : undefined,
-        },
-      ];
+      selected = [...selected, option];
     }
   }
 

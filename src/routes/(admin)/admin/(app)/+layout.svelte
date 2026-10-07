@@ -42,6 +42,7 @@
     { title: "Dashboard",    icon: "icon/layout-grid",  href: "/admin/dashboard" },
     { title: "Users",        icon: "icon/users",        href: "/admin/users" },
     { title: "Companies",    icon: "icon/building",     href: "/admin/companies" },
+    { title: "Customers",    icon: "icon/users",        href: "/admin/customers" },
     { title: "Activity Log", icon: "icon/activity",     href: "/admin/activity" },
     { title: "Subscription", icon: "icon/credit-card",  href: "/admin/subscription" },
     { title: "Setting",      icon: "icon/settings",     href: "/admin/setting" },

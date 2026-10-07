@@ -1,0 +1,33 @@
+query getCompanyCustomers(
+  $companyId: uuid!
+  $limit: Int
+  $offset: Int
+) {
+  company_customer(
+    where: { company: { _eq: $companyId } }
+    limit: $limit
+    offset: $offset
+    order_by: [{ created_at: desc }]
+  ) {
+    id
+    created_at
+    customer
+    company
+    branch
+    customerByCustomer {
+      id
+      first_name
+      last_name
+      phone_number
+    }
+    branchByBranch {
+      id
+      name
+    }
+  }
+  total: company_customer_aggregate(where: { company: { _eq: $companyId } }) {
+    aggregate {
+      count
+    }
+  }
+}
