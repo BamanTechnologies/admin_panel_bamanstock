@@ -1,0 +1,10 @@
+query adminProfile($id: uuid!) {
+  profile: account_users_by_pk(id: $id) {
+    id
+    first_name
+    last_name
+    email
+    phone
+    profile_picture
+  }
+}

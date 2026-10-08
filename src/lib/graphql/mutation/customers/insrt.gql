@@ -1,0 +1,5 @@
+mutation insertCustomer($object: customers_insert_input!) {
+  insert_customers_one(object: $object) {
+    id
+  }
+}
