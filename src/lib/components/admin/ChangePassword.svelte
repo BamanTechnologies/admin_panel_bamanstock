@@ -5,7 +5,7 @@
   import { fade, scale } from "svelte/transition";
   import { toast } from "svelte-sonner";
   import { getAdminClient } from "$graphql/client";
-  import CHANGE_PASSWORD from "$graphql/mutation/auth/auth.gql";
+  import CHANGE_PASSWORD from "$graphql/mutation/auth/change_password.gql";
   import { CombinedGraphQLErrors, ServerError } from "@apollo/client/errors";
 
   type ChangePasswordResponse = {

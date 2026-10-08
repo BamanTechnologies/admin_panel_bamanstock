@@ -2,9 +2,10 @@ query getCompanyCustomers(
   $companyId: uuid!
   $limit: Int
   $offset: Int
+  $filter: company_customer_bool_exp = {}
 ) {
   company_customer(
-    where: { company: { _eq: $companyId } }
+    where: { _and: [{ company: { _eq: $companyId } }, $filter] }
     limit: $limit
     offset: $offset
     order_by: [{ created_at: desc }]
@@ -25,7 +26,9 @@ query getCompanyCustomers(
       name
     }
   }
-  total: company_customer_aggregate(where: { company: { _eq: $companyId } }) {
+  total: company_customer_aggregate(
+    where: { _and: [{ company: { _eq: $companyId } }, $filter] }
+  ) {
     aggregate {
       count
     }

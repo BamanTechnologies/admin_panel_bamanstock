@@ -5,12 +5,15 @@
   import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import BranchForm from "$lib/components/admin/branches/BranchForm.svelte";
   import AddCompanyCustomerModal from "$lib/components/admin/companies/AddCompanyCustomerModal.svelte";
+  import AddCompanyInvestorModal from "$lib/components/admin/companies/AddCompanyInvestorModal.svelte";
   import { getAdminClient } from "$graphql/client";
   import COMPANY_BY_ID from "$graphql/queries/companies/by_id.gql";
   import BRANCHES from "$graphql/queries/branches/branches.gql";
   import DELETE_BRANCH from "$graphql/mutation/branches/delete.gql";
   import COMPANY_CUSTOMERS from "$graphql/queries/company_customers/list_by_company.gql";
   import DELETE_COMPANY_CUSTOMER from "$graphql/mutation/company_customers/remove.gql";
+  import INVESTORS from "$graphql/queries/investors/list.gql";
+  import REMOVE_INVESTOR_FROM_COMPANY from "$graphql/mutation/investors/remove_from_company.gql";
   import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS, buildPageList } from "$lib/pagination";
 
   type BranchRow = {
@@ -49,14 +52,29 @@
     branchByBranch?: { id: string; name: string } | null;
   };
 
+  type InvestorRow = {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    phone_number: string | null;
+    created_at: string;
+    user?: {
+      id: string;
+      is_active: boolean;
+      email: string | null;
+    } | null;
+  };
+
   const companyId = $derived($page.params.id as string);
 
   let company = $state<CompanyDetail | null>(null);
   let branches = $state<BranchRow[]>([]);
   let companyCustomers = $state<CompanyCustomerRow[]>([]);
-  let activeTab = $state<"branches" | "customers">("branches");
+  let investors = $state<InvestorRow[]>([]);
+  let activeTab = $state<"branches" | "customers" | "investors">("branches");
   let loading = $state(true);
   let customerLoading = $state(false);
+  let investorLoading = $state(false);
   let error = $state<string | null>(null);
 
   let branchPage = $state(1);
@@ -65,12 +83,28 @@
   let customerPage = $state(1);
   let customerLimit = $state<number>(DEFAULT_PAGE_SIZE);
   let customerTotal = $state(0);
+  let investorPage = $state(1);
+  let investorLimit = $state<number>(DEFAULT_PAGE_SIZE);
+  let investorTotal = $state(0);
 
   let isAddCustomerOpen = $state(false);
   let confirmDetachOpen = $state(false);
   let pendingCustomer = $state<CompanyCustomerRow | null>(null);
   let detachLoading = $state(false);
   let detachError = $state<string | null>(null);
+
+  let isAddInvestorOpen = $state(false);
+  let confirmInvestorDetachOpen = $state(false);
+  let pendingInvestor = $state<InvestorRow | null>(null);
+  let investorDetachLoading = $state(false);
+  let investorDetachError = $state<string | null>(null);
+
+  let branchSearch = $state("");
+  let customerSearch = $state("");
+  let investorSearch = $state("");
+  let branchSearchDebounce: ReturnType<typeof setTimeout>;
+  let customerSearchDebounce: ReturnType<typeof setTimeout>;
+  let investorSearchDebounce: ReturnType<typeof setTimeout>;
 
   let confirmDeleteOpen = $state(false);
   let pendingBranch = $state<BranchRow | null>(null);
@@ -94,13 +128,21 @@
 
   async function loadBranches() {
     try {
+      const q = branchSearch.trim();
+      const filter: Record<string, unknown> = { company: { _eq: companyId } };
+      if (q) {
+        filter._or = [
+          { name: { _ilike: `%${q}%` } },
+          { address: { _ilike: `%${q}%` } },
+        ];
+      }
       const result = await getAdminClient().query<{
         branches: BranchRow[];
         total: { aggregate: { count: number } };
       }>({
         query: BRANCHES,
         variables: {
-          filter: { company: { _eq: companyId } },
+          filter,
           limit: branchLimit,
           offset: (branchPage - 1) * branchLimit,
           order: [{ created_at: "desc" }],
@@ -121,12 +163,22 @@
   async function loadCompanyCustomers() {
     customerLoading = true;
     try {
+      const q = customerSearch.trim();
+      const filter: Record<string, unknown> = {};
+      if (q) {
+        filter._or = [
+          { customerByCustomer: { first_name: { _ilike: `%${q}%` } } },
+          { customerByCustomer: { last_name: { _ilike: `%${q}%` } } },
+          { customerByCustomer: { phone_number: { _ilike: `%${q}%` } } },
+          { branchByBranch: { name: { _ilike: `%${q}%` } } },
+        ];
+      }
       const result = await getAdminClient().query<{
         company_customer: CompanyCustomerRow[];
         total: { aggregate: { count: number } };
       }>({
         query: COMPANY_CUSTOMERS,
-        variables: { companyId, limit: customerLimit, offset: (customerPage - 1) * customerLimit },
+        variables: { companyId, limit: customerLimit, offset: (customerPage - 1) * customerLimit, filter },
       });
       companyCustomers = result.data?.company_customer ?? [];
       customerTotal = result.data?.total?.aggregate?.count ?? 0;
@@ -142,10 +194,52 @@
     }
   }
 
+  async function loadInvestors() {
+    investorLoading = true;
+    try {
+      const q = investorSearch.trim();
+      const conds: Record<string, unknown>[] = [{ company_investors: { company: { _eq: companyId } } }];
+      if (q) {
+        conds.push({
+          _or: [
+            { first_name: { _ilike: `%${q}%` } },
+            { last_name: { _ilike: `%${q}%` } },
+            { phone_number: { _ilike: `%${q}%` } },
+            { address: { _ilike: `%${q}%` } },
+            { user: { email: { _ilike: `%${q}%` } } },
+          ],
+        });
+      }
+      const result = await getAdminClient().query<{
+        investor: InvestorRow[];
+        investor_aggregate: { aggregate: { count: number } };
+      }>({
+        query: INVESTORS,
+        variables: {
+          filter: conds.length > 1 ? { _and: conds } : conds[0],
+          limit: investorLimit,
+          offset: (investorPage - 1) * investorLimit,
+          order: [{ created_at: "desc" }],
+        },
+      });
+      investors = result.data?.investor ?? [];
+      investorTotal = result.data?.investor_aggregate?.aggregate?.count ?? 0;
+      const totalPages = Math.max(1, Math.ceil(investorTotal / investorLimit));
+      if (investorPage > totalPages && investorTotal > 0) {
+        investorPage = totalPages;
+        loadInvestors();
+      }
+    } catch (e) {
+      error = e instanceof Error ? e.message : "Failed to load investors.";
+    } finally {
+      investorLoading = false;
+    }
+  }
+
   async function loadAll() {
     loading = true;
     error = null;
-    await Promise.all([loadCompany(), loadBranches(), loadCompanyCustomers()]);
+    await Promise.all([loadCompany(), loadBranches(), loadCompanyCustomers(), loadInvestors()]);
     loading = false;
   }
 
@@ -158,12 +252,14 @@
     return agg?.aggregate?.count ?? 0;
   }
 
-  function setTab(tab: "branches" | "customers") {
+  function setTab(tab: "branches" | "customers" | "investors") {
     activeTab = tab;
     if (tab === "branches") {
       loadBranches();
-    } else {
+    } else if (tab === "customers") {
       loadCompanyCustomers();
+    } else {
+      loadInvestors();
     }
   }
 
@@ -194,6 +290,45 @@
     customerLimit = Number((e.currentTarget as HTMLSelectElement).value) || DEFAULT_PAGE_SIZE;
     customerPage = 1;
     loadCompanyCustomers();
+  }
+
+  const investorTotalPages = $derived(Math.max(1, Math.ceil(investorTotal / investorLimit)));
+  const investorPageStart = $derived(investorTotal === 0 ? 0 : (investorPage - 1) * investorLimit + 1);
+  const investorPageEnd = $derived(Math.min(investorPage * investorLimit, investorTotal));
+
+  function goToInvestorPage(p: number) {
+    investorPage = p;
+    loadInvestors();
+  }
+
+  function handleInvestorLimitChange(e: Event) {
+    investorLimit = Number((e.currentTarget as HTMLSelectElement).value) || DEFAULT_PAGE_SIZE;
+    investorPage = 1;
+    loadInvestors();
+  }
+
+  function handleBranchSearchInput() {
+    clearTimeout(branchSearchDebounce);
+    branchSearchDebounce = setTimeout(() => {
+      branchPage = 1;
+      loadBranches();
+    }, 400);
+  }
+
+  function handleCustomerSearchInput() {
+    clearTimeout(customerSearchDebounce);
+    customerSearchDebounce = setTimeout(() => {
+      customerPage = 1;
+      loadCompanyCustomers();
+    }, 400);
+  }
+
+  function handleInvestorSearchInput() {
+    clearTimeout(investorSearchDebounce);
+    investorSearchDebounce = setTimeout(() => {
+      investorPage = 1;
+      loadInvestors();
+    }, 400);
   }
 
   function formatDate(iso: string): string {
@@ -271,6 +406,40 @@
       detachError = e instanceof Error ? e.message : "Failed to detach customer.";
     } finally {
       detachLoading = false;
+    }
+  }
+
+  function openAddInvestor() {
+    isAddInvestorOpen = true;
+  }
+
+  function openInvestorDetach(inv: InvestorRow) {
+    pendingInvestor = inv;
+    investorDetachError = null;
+    confirmInvestorDetachOpen = true;
+  }
+
+  function investorDetachLabel(): string {
+    const i = pendingInvestor;
+    return i ? `${i.first_name ?? ""} ${i.last_name ?? ""}`.trim() || "this investor" : "this investor";
+  }
+
+  async function confirmInvestorDetach() {
+    if (!pendingInvestor) return;
+    investorDetachLoading = true;
+    investorDetachError = null;
+    try {
+      await getAdminClient().mutate({
+        mutation: REMOVE_INVESTOR_FROM_COMPANY,
+        variables: { companyId, investorId: pendingInvestor.id },
+      });
+      confirmInvestorDetachOpen = false;
+      pendingInvestor = null;
+      loadInvestors();
+    } catch (e) {
+      investorDetachError = e instanceof Error ? e.message : "Failed to remove investor.";
+    } finally {
+      investorDetachLoading = false;
     }
   }
 
@@ -400,6 +569,18 @@
         >
           <Icon iconName="icon/users" size={16} /> Customers
         </button>
+        <button
+          type="button"
+          data-tab="investors"
+          onclick={() => setTab("investors")}
+          class={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors ${
+            activeTab === "investors"
+              ? "border-[#4D8DEE] text-[#4D8DEE]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Icon iconName="icon/users" size={16} /> Investors
+        </button>
       </div>
 
       {#if activeTab === "branches"}
@@ -409,6 +590,20 @@
               <Icon iconName="icon/store" size={18} class="text-info" />
               Branches
             </h3>
+            <div class="relative w-64">
+              <Icon
+                iconName="icon/search"
+                size={16}
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search branches..."
+                bind:value={branchSearch}
+                oninput={handleBranchSearchInput}
+                class="w-full bg-muted border border-border rounded-xl py-2 pl-9 pr-4 text-sm"
+              />
+            </div>
             <button
               onclick={openAddBranch}
               class="flex items-center gap-2 bg-[#4D8DEE] text-white rounded-lg px-4 py-2 text-sm font-bold shadow-sm hover:opacity-90"
@@ -542,13 +737,27 @@
             {/if}
           </div>
         </div>
-      {:else}
+      {:else if activeTab === "customers"}
         <div class="bg-card border border-border rounded-b-2xl shadow-sm min-h-[300px]">
           <div class="p-4 border-b border-border flex items-center justify-between flex-wrap gap-3">
             <h3 class="text-base font-bold text-foreground flex items-center gap-2">
               <Icon iconName="icon/users" size={18} class="text-purple-600" />
               Customers
             </h3>
+            <div class="relative w-64">
+              <Icon
+                iconName="icon/search"
+                size={16}
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search customers..."
+                bind:value={customerSearch}
+                oninput={handleCustomerSearchInput}
+                class="w-full bg-muted border border-border rounded-xl py-2 pl-9 pr-4 text-sm"
+              />
+            </div>
             <button
               onclick={openAddCustomer}
               class="flex items-center gap-2 bg-[#4D8DEE] text-white rounded-lg px-4 py-2 text-sm font-bold shadow-sm hover:opacity-90"
@@ -672,6 +881,150 @@
             {/if}
           </div>
         </div>
+      {:else}
+        <div class="bg-card border border-border rounded-b-2xl shadow-sm min-h-[300px]">
+          <div class="p-4 border-b border-border flex items-center justify-between flex-wrap gap-3">
+            <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+              <Icon iconName="icon/users" size={18} class="text-emerald-600" />
+              Investors
+            </h3>
+            <div class="relative w-64">
+              <Icon
+                iconName="icon/search"
+                size={16}
+                class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Search investors..."
+                bind:value={investorSearch}
+                oninput={handleInvestorSearchInput}
+                class="w-full bg-muted border border-border rounded-xl py-2 pl-9 pr-4 text-sm"
+              />
+            </div>
+            <button
+              onclick={openAddInvestor}
+              class="flex items-center gap-2 bg-[#4D8DEE] text-white rounded-lg px-4 py-2 text-sm font-bold shadow-sm hover:opacity-90"
+            >
+              <Icon iconName="icon/plus" size={16} /> Add Investor
+            </button>
+          </div>
+
+          <table class="w-full text-sm">
+            <thead class="bg-muted/80 text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
+              <tr>
+                <th class="px-6 py-4 text-left">Investor</th>
+                <th class="px-6 py-4 text-left">Phone</th>
+                <th class="px-6 py-4 text-left">Email</th>
+                <th class="px-6 py-4 text-center">Status</th>
+                <th class="px-6 py-4 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              {#if investorLoading}
+                {#each Array(3) as _, i}
+                  <tr class="animate-pulse">
+                    <td class="px-6 py-4"><div class="w-40 h-3 rounded bg-muted"></div></td>
+                    <td class="px-6 py-4"><div class="w-28 h-3 rounded bg-muted"></div></td>
+                    <td class="px-6 py-4"><div class="w-44 h-3 rounded bg-muted"></div></td>
+                    <td class="px-6 py-4"><div class="w-16 h-3 mx-auto rounded bg-muted"></div></td>
+                    <td class="px-6 py-4"><div class="w-10 h-3 ml-auto rounded bg-muted"></div></td>
+                  </tr>
+                {/each}
+              {:else if investors.length === 0}
+                <tr>
+                  <td colspan="5" class="px-6 py-16 text-center">
+                    <Icon iconName="icon/users" size={24} class="text-muted-foreground inline mr-2" />
+                    <span class="text-muted-foreground">No investors linked to this company yet.</span>
+                  </td>
+                </tr>
+              {:else}
+                {#each investors as inv}
+                  <tr class="hover:bg-muted/50">
+                    <td class="px-6 py-4 font-bold flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                        <Icon iconName="icon/user" size={16} />
+                      </div>
+                      {`${inv.first_name ?? ""} ${inv.last_name ?? ""}`.trim() || "—"}
+                    </td>
+                    <td class="px-6 py-4 text-muted-foreground">{inv.phone_number ?? "—"}</td>
+                    <td class="px-6 py-4 text-muted-foreground">{inv.user?.email ?? "—"}</td>
+                    <td class="px-6 py-4 text-center">
+                      {#if inv.user?.is_active}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600">
+                          <Icon iconName="icon/check-circle" size={11} /> Active
+                        </span>
+                      {:else}
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-muted text-muted-foreground">
+                          <Icon iconName="icon/user-minus" size={11} /> Inactive
+                        </span>
+                      {/if}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                      <button
+                        title="Remove investor"
+                        onclick={() => openInvestorDetach(inv)}
+                        class="p-1.5 text-muted-foreground hover:text-rose-500"
+                      >
+                        <Icon iconName="icon/user-minus" size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                {/each}
+              {/if}
+            </tbody>
+          </table>
+
+          <div class="p-4 border-t border-border flex items-center justify-between text-muted-foreground text-sm flex-wrap gap-3">
+            <div class="flex items-center gap-2">
+              Row Per Page
+              <select
+                value={investorLimit}
+                onchange={handleInvestorLimitChange}
+                class="bg-muted border border-border rounded px-2 py-1 outline-none"
+              >
+                {#each PAGE_SIZE_OPTIONS as sizeOption}
+                  <option value={sizeOption}>{sizeOption}</option>
+                {/each}
+              </select>
+              <span>{investorTotal === 0 ? "0 entries" : `Showing ${investorPageStart}–${investorPageEnd} of ${investorTotal} entries`}</span>
+            </div>
+            {#if investorTotalPages > 1}
+              <div class="flex items-center gap-1">
+                <button
+                  onclick={() => goToInvestorPage(Math.max(1, investorPage - 1))}
+                  disabled={investorPage === 1}
+                  class="p-1 hover:text-blue-600 disabled:opacity-30"
+                  aria-label="Previous page"
+                >
+                  <Icon iconName="icon/chevron-left" size={16} />
+                </button>
+                {#each buildPageList(investorPage, investorTotalPages) as p}
+                  {#if p === "…"}
+                    <span class="px-1 text-xs">…</span>
+                  {:else}
+                    <button
+                      onclick={() => goToInvestorPage(p)}
+                      class={`w-6 h-6 flex items-center justify-center rounded-full text-xs ${
+                        p === investorPage ? "bg-[#4D8DEE] text-white" : "hover:bg-muted"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  {/if}
+                {/each}
+                <button
+                  onclick={() => goToInvestorPage(Math.min(investorTotalPages, investorPage + 1))}
+                  disabled={investorPage === investorTotalPages}
+                  class="p-1 hover:text-blue-600 disabled:opacity-30"
+                  aria-label="Next page"
+                >
+                  <Icon iconName="icon/chevron-right" size={16} />
+                </button>
+              </div>
+            {/if}
+          </div>
+        </div>
       {/if}
     </div>
   {/if}
@@ -708,3 +1061,18 @@
   {companyId}
   onSuccess={loadCompanyCustomers}
 />
+<ConfirmModal
+  bind:isOpen={confirmInvestorDetachOpen}
+  title="Remove investor"
+  icon="icon/user-minus"
+  message={`Are you sure you want to remove <strong>${investorDetachLabel()}</strong> from this company? The investor profile itself will be kept.`}
+  error={investorDetachError}
+  confirmText="Remove"
+  loading={investorDetachLoading}
+  onConfirm={confirmInvestorDetach}
+/>
+<AddCompanyInvestorModal
+  bind:isOpen={isAddInvestorOpen}
+  {companyId}
+  onSuccess={loadInvestors}
+ />
