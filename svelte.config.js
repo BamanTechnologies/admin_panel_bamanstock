@@ -14,6 +14,7 @@ const config = {
     adapter: adapter(),
     alias: {
       $assets: "src/assets",
+      $graphql: "src/lib/graphql",
     },
   },
 };

@@ -1,0 +1,5 @@
+mutation insertIntoCompany($object: company_investor_insert_input!) {
+  insert_company_investor_one(object: $object) {
+    id
+  }
+}

@@ -13,7 +13,7 @@
       <div class="p-6 flex justify-between items-center border-b border-border">
         <h3 class="text-xl font-bold text-foreground">Reset password</h3>
         <button onclick={close} class="text-muted-foreground hover:text-muted-foreground">
-          <Icon iconName="icon/menu" size={20} class="rotate-45" />
+          <Icon iconName="icon/x" size={20} />
         </button>
       </div>
       
