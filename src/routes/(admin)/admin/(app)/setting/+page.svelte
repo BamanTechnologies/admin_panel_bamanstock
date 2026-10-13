@@ -124,7 +124,7 @@
       </div>
 
       <!-- 2FA -->
-      <div class="px-6 py-4 flex items-center justify-between">
+      <!-- <div class="px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 rounded-lg bg-info/10 flex items-center justify-center">
             <Icon iconName="icon/shield-check" size={18} class="text-info" />
@@ -141,7 +141,7 @@
         >
           <span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-card shadow transition-transform {twoFactor ? 'translate-x-5' : 'translate-x-0'}"></span>
         </button>
-      </div>
+      </div> -->
     </div>
   </div>
 
