@@ -1,0 +1,7 @@
+mutation insertPricingPlan($object: billing_pricing_plans_insert_input!) {
+  insert_billing_pricing_plans_one(object: $object) {
+    id
+    name
+    is_public
+  }
+}

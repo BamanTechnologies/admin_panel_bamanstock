@@ -1,0 +1,19 @@
+query pricingPlanPrices($filter: billing_pricing_plan_frequency_prices_bool_exp) {
+  billing_pricing_plan_frequency_prices(
+    where: $filter
+    order_by: [{ frequency: asc }]
+  ) {
+    id
+    price
+    frequency
+    rules
+    description
+    pricing_plan {
+      id
+      name
+      type
+      is_public
+      description
+    }
+  }
+}

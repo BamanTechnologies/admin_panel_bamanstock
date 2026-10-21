@@ -1,0 +1,53 @@
+query billingStats {
+  total_plans: billing_pricing_plans_aggregate {
+    aggregate {
+      count
+    }
+  }
+  public_plans: billing_pricing_plans_aggregate(where: { is_public: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+  total_payments: billing_payments_aggregate {
+    aggregate {
+      count
+    }
+  }
+  verified_payments: billing_payments_aggregate(where: { is_verified: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+  pending_payments: billing_payments_aggregate(where: { is_verified: { _eq: false } }) {
+    aggregate {
+      count
+    }
+  }
+  total_invoices: billing_invoices_aggregate(where: { is_deleted: { _eq: false } }) {
+    aggregate {
+      count
+    }
+  }
+  collected_amount: billing_payments_aggregate(where: { is_verified: { _eq: true } }) {
+    aggregate {
+      sum {
+        total
+      }
+    }
+  }
+  outstanding_amount: billing_payments_aggregate(where: { is_verified: { _eq: false } }) {
+    aggregate {
+      sum {
+        total
+      }
+    }
+  }
+  invoiced_amount: billing_invoices_aggregate(where: { is_deleted: { _eq: false } }) {
+    aggregate {
+      sum {
+        total
+      }
+    }
+  }
+}

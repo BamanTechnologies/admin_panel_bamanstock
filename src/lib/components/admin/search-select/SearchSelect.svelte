@@ -20,6 +20,7 @@
     placeholder = "Search and select...",
     initialValue = "",
     mode = "form",
+    selected = null,
     client: clientProp,
     onSelect = () => {},
   }: {
@@ -31,6 +32,7 @@
     placeholder?: string;
     initialValue?: string;
     mode?: "filter" | "form";
+    selected?: SelectItem | null;
     client?: ApolloClient;
     onSelect?: (item: SelectItem | null) => void;
   } = $props();
@@ -154,6 +156,15 @@
       }
     });
     return () => clearTimeout(debounceTimer);
+  });
+
+  // Mirror a selection that was made outside the component (a wizard that
+  // remounts this control, for instance). Clearing the selection sets it to
+  // null, which leaves whatever the user is typing alone.
+  $effect(() => {
+    if (!selected) return;
+    selectedItem = selected;
+    searchText = displayLabel(selected);
   });
 </script>
 

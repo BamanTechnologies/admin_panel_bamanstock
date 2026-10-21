@@ -1,0 +1,9 @@
+query paymentStatus(
+  $filter: billing_payment_status_bool_exp
+  $limit: Int
+  $offset: Int
+) {
+  billing_payment_status(where: $filter, limit: $limit, offset: $offset) {
+    value
+  }
+}
