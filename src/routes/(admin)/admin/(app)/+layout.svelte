@@ -43,7 +43,6 @@
     { title: "Users",        icon: "icon/users",        href: "/admin/users" },
     { title: "Companies",    icon: "icon/building",     href: "/admin/companies" },
     { title: "Customers",    icon: "icon/users",        href: "/admin/customers" },
-    { title: "Activity Log", icon: "icon/activity",     href: "/admin/activity" },
     { title: "Billing",      icon: "icon/credit-card",  href: "/admin/billing" },
     { title: "Setting",      icon: "icon/settings",     href: "/admin/setting" },
   ];

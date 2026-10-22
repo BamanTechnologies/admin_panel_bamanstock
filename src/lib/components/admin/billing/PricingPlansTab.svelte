@@ -261,43 +261,40 @@
       </button>
     </div>
   {:else}
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 rounded-[2rem] border border-[#4DA0E6]/15 bg-gradient-to-br from-[#4DA0E6]/5 via-background to-[#4DA0E6]/10 p-3 sm:p-5"
+    >
       {#each rows as row (row.id)}
         {@const plan = row.pricing_plan}
         {@const rules = rulesToEntries(row.rules)}
         <article
-          class="group relative flex flex-col rounded-2xl border bg-card shadow-sm transition-all hover:shadow-md {plan.is_public
-            ? 'border-info/40'
-            : 'border-border'}"
+          class="group relative flex min-h-[32rem] flex-col overflow-hidden rounded-[1.75rem] border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl {plan.is_public
+            ? 'border-[#4DA0E6] shadow-[#4DA0E6]/15'
+            : 'border-border/80'}"
         >
-          <!-- Accent strip -->
           <div
-            class="h-1.5 w-full rounded-t-2xl {plan.is_public
-              ? 'bg-gradient-to-r from-info to-[#4D8DEE]'
-              : 'bg-gradient-to-r from-muted-foreground/40 to-muted-foreground/20'}"
+            class="h-2 w-full {plan.is_public
+              ? 'bg-[#4DA0E6]'
+              : 'bg-gradient-to-r from-muted-foreground/30 to-muted-foreground/10'}"
           ></div>
 
-          <div class="p-5 flex flex-col gap-4 flex-1">
+          <div class="flex flex-1 flex-col gap-5 p-5 sm:p-6">
             <!-- Header -->
             <div class="flex items-start justify-between gap-3">
-              <div class="flex items-start gap-3 min-w-0">
+              <div class="min-w-0 flex-1 text-center">
                 <div
-                  class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 {plan.is_public
-                    ? 'bg-info/10 text-info'
+                  class="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full {plan.is_public
+                    ? 'bg-[#4DA0E6]/15 text-[#4DA0E6]'
                     : 'bg-muted text-muted-foreground'}"
                 >
                   <Icon iconName="icon/star" size={18} />
                 </div>
-                <div class="min-w-0">
-                  <h3 class="font-bold text-foreground leading-tight truncate">{plan.name}</h3>
-                  <p class="text-[11px] text-muted-foreground mt-0.5">
-                    {planTypeLabel(plan.type)}
-                  </p>
-                </div>
+                <h3 class="truncate text-lg font-bold leading-tight text-foreground">{plan.name}</h3>
+                <p class="mt-1 text-[11px] text-muted-foreground">{planTypeLabel(plan.type)}</p>
               </div>
               <span
-                class="px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 {plan.is_public
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+                class="absolute right-5 top-5 rounded-full px-2.5 py-1 text-[10px] font-bold {plan.is_public
+                  ? 'bg-[#4DA0E6] text-white'
                   : 'bg-muted text-muted-foreground'}"
               >
                 {plan.is_public ? "Public" : "Private"}
@@ -305,87 +302,98 @@
             </div>
 
             <!-- Price -->
-            <div class="flex items-baseline gap-1.5">
-              <span class="text-2xl font-extrabold text-foreground tracking-tight">
+            <div class="text-center">
+              <span class="text-4xl font-extrabold tracking-tight text-foreground">
                 {formatCurrency(row.price)}
               </span>
-              <span class="text-xs font-semibold text-muted-foreground">
-                {frequencySuffix(row.frequency)}
-              </span>
-            </div>
-
-            <div class="flex items-center gap-2">
-              <span
-                class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-info/10 text-info text-[10px] font-bold"
-              >
-                <Icon iconName="icon/refresh-cw" size={11} />
-                {frequencyLabel(row.frequency)}
-              </span>
+              <span class="ml-1 text-xs font-semibold text-muted-foreground">{frequencySuffix(row.frequency)}</span>
+              <div class="mt-2">
+                <span
+                  class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold {plan.is_public
+                    ? 'bg-[#4DA0E6]/10 text-[#4DA0E6]'
+                    : 'bg-muted text-muted-foreground'}"
+                >
+                  <Icon iconName="icon/refresh-cw" size={11} />
+                  {frequencyLabel(row.frequency)}
+                </span>
+              </div>
               {#if row.description}
-                <span class="text-[11px] text-muted-foreground truncate">{row.description}</span>
+                <p class="mt-2 truncate text-[11px] text-muted-foreground">{row.description}</p>
               {/if}
             </div>
 
             {#if plan.description}
-              <p class="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+              <p class="text-center text-xs leading-relaxed text-muted-foreground line-clamp-2">
                 {plan.description}
               </p>
             {/if}
 
             <!-- Rules -->
             {#if rules.length > 0}
-              <ul class="flex flex-col gap-1.5 border-t border-border pt-3">
+              <ul class="flex flex-col gap-2.5 border-t border-border pt-4">
                 {#each rules as rule}
-                  <li class="flex items-center justify-between gap-3 text-xs">
-                    <span class="text-muted-foreground">{rule.label}</span>
-                    <span class="font-semibold text-foreground text-right truncate">{rule.value}</span>
+                  <li class="flex items-center gap-2 text-xs">
+                    <span
+                      class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full {plan.is_public
+                        ? 'bg-[#4DA0E6] text-white'
+                        : 'bg-muted text-muted-foreground'}"
+                    >
+                      <Icon iconName="icon/check" size={10} />
+                    </span>
+                    <span class="min-w-0 truncate text-muted-foreground">{rule.label}</span>
+                    <span class="ml-auto max-w-[40%] truncate text-right font-semibold text-foreground"
+                      >{rule.value}</span
+                    >
                   </li>
                 {/each}
               </ul>
             {/if}
 
             <!-- Footer -->
-            <div class="mt-auto pt-4 border-t border-border flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  role="switch"
-                  aria-checked={plan.is_public}
-                  aria-label="Toggle public visibility"
-                  disabled={togglingId === plan.id}
-                  onclick={() => toggleVisibility(row)}
-                  class="w-10 h-5 rounded-full transition-colors shrink-0 disabled:opacity-50 {plan.is_public
-                    ? 'bg-info'
-                    : 'bg-muted-foreground/30'}"
-                >
-                  <span
-                    class="block w-4 h-4 mt-0.5 rounded-full bg-white shadow transition-transform {plan.is_public
-                      ? 'translate-x-5'
-                      : 'translate-x-0.5'}"
-                  ></span>
-                </button>
-                <span class="text-[11px] font-medium text-muted-foreground">
-                  {plan.is_public ? "Public" : "Private"}
-                </span>
-              </div>
+            <div class="mt-auto flex flex-col gap-4 border-t border-border pt-4">
+              <button
+                type="button"
+                onclick={() => openEdit(row)}
+                class="w-full rounded-full border px-4 py-2.5 text-xs font-bold transition-colors {plan.is_public
+                  ? 'border-[#4DA0E6] bg-[#4DA0E6] text-white hover:bg-[#3d8ccb]'
+                  : 'border-border text-foreground hover:border-[#4DA0E6] hover:text-[#4DA0E6]'}"
+              >
+                Edit plan
+              </button>
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={plan.is_public}
+                    aria-label="Toggle public visibility"
+                    disabled={togglingId === plan.id}
+                    onclick={() => toggleVisibility(row)}
+                    class="h-5 w-10 shrink-0 rounded-full transition-colors disabled:opacity-50 {plan.is_public
+                      ? 'bg-[#4DA0E6]'
+                      : 'bg-muted-foreground/30'}"
+                  >
+                    <span
+                      class="block h-4 w-4 rounded-full bg-white shadow transition-transform mt-0.5 {plan.is_public
+                        ? 'translate-x-5'
+                        : 'translate-x-0.5'}"
+                    ></span>
+                  </button>
+                  <span class="text-[11px] font-medium text-muted-foreground">
+                    {plan.is_public ? "Public" : "Private"}
+                  </span>
+                </div>
 
-              <div class="flex items-center gap-1">
-                <button
-                  type="button"
-                  title="Edit plan"
-                  onclick={() => openEdit(row)}
-                  class="p-1.5 rounded-md text-muted-foreground hover:text-info hover:bg-info/10 transition-colors"
-                >
-                  <Icon iconName="icon/edit" size={16} />
-                </button>
-                <button
-                  type="button"
-                  title="Delete plan"
-                  onclick={() => openDelete(row)}
-                  class="p-1.5 rounded-md text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                >
-                  <Icon iconName="icon/trash" size={16} />
-                </button>
+                <div class="flex items-center gap-1">
+                  <button
+                    type="button"
+                    title="Delete plan"
+                    onclick={() => openDelete(row)}
+                    class="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-rose-50 hover:text-rose-500 dark:hover:bg-rose-950/40"
+                  >
+                    <Icon iconName="icon/trash" size={16} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
