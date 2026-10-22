@@ -1,0 +1,9 @@
+mutation insertCompanyCustomers($object: company_customer_insert_input!) {
+  insert_company_customer_one(object: $object) {
+    created_at
+    customer
+    updated_at
+    company
+    branch
+  }
+}

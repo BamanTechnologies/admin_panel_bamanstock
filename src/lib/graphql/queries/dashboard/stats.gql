@@ -1,0 +1,22 @@
+query dashboardStats {
+  total_investors: investor_aggregate {
+    aggregate {
+      count
+    }
+  }
+  total_companies: companies_aggregate {
+    aggregate {
+      count
+    }
+  }
+  total_customers: customers_aggregate {
+    aggregate {
+      count
+    }
+  }
+  total_merchants: merchant_aggregate {
+    aggregate {
+      count
+    }
+  }
+}

@@ -1,0 +1,5 @@
+mutation deletePricingPlanRow($id: uuid!) {
+  delete_billing_pricing_plans_by_pk(id: $id) {
+    id
+  }
+}

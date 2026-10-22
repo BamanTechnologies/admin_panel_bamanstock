@@ -1,0 +1,13 @@
+query getInvestorSearch(
+  $filter: investor_bool_exp
+  $limit: Int
+  $offset: Int
+  $order: [investor_order_by!]
+) {
+  investor(where: $filter, limit: $limit, offset: $offset, order_by: $order) {
+    id
+    first_name
+    last_name
+    phone_number
+  }
+}

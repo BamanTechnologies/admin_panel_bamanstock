@@ -1,0 +1,11 @@
+mutation DeleteCompany($id: uuid!) {
+  delete_company_customer(where: { company: { _eq: $id } }) {
+    affected_rows
+  }
+  delete_company_investor(where: { company: { _eq: $id } }) {
+    affected_rows
+  }
+  delete_companies_by_pk(id: $id) {
+    id
+  }
+}

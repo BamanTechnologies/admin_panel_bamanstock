@@ -1,0 +1,7 @@
+mutation insertPricingPlanFrequencies(
+  $objects: [billing_pricing_plan_frequency_prices_insert_input!]!
+) {
+  insert_billing_pricing_plan_frequency_prices(objects: $objects) {
+    affected_rows
+  }
+}

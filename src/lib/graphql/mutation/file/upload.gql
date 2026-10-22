@@ -1,0 +1,5 @@
+mutation uploadFile($files: [UploadInput!]!) {
+  upload_files(args: $files) {
+    secure_url
+  }
+}

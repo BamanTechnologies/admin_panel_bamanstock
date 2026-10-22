@@ -1,0 +1,69 @@
+query invoices(
+  $filter: billing_invoices_bool_exp
+  $limit: Int
+  $offset: Int
+  $order: [billing_invoices_order_by]
+) {
+  billing_invoices(
+    where: $filter
+    limit: $limit
+    offset: $offset
+    order_by: $order
+  ) {
+    id
+    invoice_number
+    is_deleted
+    reason
+    start_date
+    end_date
+    subtotal
+    tin_number
+    total
+    transaction_id
+    updated_at
+    vat
+    withholding
+    created_at
+    company {
+      id
+      name
+      tin_number
+      license
+    }
+    payment {
+      id
+      payment_method
+      payment_status
+      is_verified
+      reference_file
+      transaction_id
+      transaction_note
+      payment_date
+    }
+    pricing_plan_frequency_price {
+      id
+      frequency
+      price
+      rules
+      pricing_plan {
+        id
+        name
+        type
+        is_public
+        description
+      }
+    }
+  }
+  total: billing_invoices_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+  amount: billing_invoices_aggregate(where: $filter) {
+    aggregate {
+      sum {
+        total
+      }
+    }
+  }
+}
