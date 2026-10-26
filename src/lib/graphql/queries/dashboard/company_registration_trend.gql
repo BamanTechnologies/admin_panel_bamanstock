@@ -1,0 +1,8 @@
+query companyRegistrationTrend($start_date: date!, $end_date: date!, $group_period: String) {
+  admin_company_registration_trend_report(
+    args: { start_date: $start_date, end_date: $end_date, group_period: $group_period }
+  ) {
+    period_date
+    total_companies
+  }
+}

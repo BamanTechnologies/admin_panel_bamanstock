@@ -14,6 +14,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.18
         version: 4.1.18(vite@7.3.0(jiti@2.6.1)(lightningcss@1.30.2))
+      apexcharts:
+        specifier: ^8.5.0
+        version: 8.5.0
       graphql:
         specifier: ^17.0.2
         version: 17.0.2
@@ -584,6 +587,13 @@ packages:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  apex-commons@0.8.3:
+    resolution: {integrity: sha512-WdU5lblyL1ByI/nkFOJkSgJYenCsHmay0P3UIcnSeUiCyF1b30SvPSZLbyxOCUOry8IlL7M0/3GvsGbZTMm8FA==}
+
+  apexcharts@8.5.0:
+    resolution: {integrity: sha512-mH9QiOwIeRGg635OzAc2mznuwrK9XHr9S1RcC26GNNOU6fUPe64cMc7hXGcM9bXz92nO4Ax7P6uxSYaTA7gBDw==}
+    engines: {node: ^20.19.0 || ^22.12.0 || >=24.0.0}
 
   aria-query@5.3.2:
     resolution: {integrity: sha512-COROpnaoap1E2F000S62r6A60uHZnmlvomhfyT2DlTcrY1OrBKn2UhH7qn5wTC9zMvD0AY7csdPSNwKP+7WiQw==}
@@ -1381,6 +1391,12 @@ snapshots:
       tslib: 2.8.1
 
   acorn@8.15.0: {}
+
+  apex-commons@0.8.3: {}
+
+  apexcharts@8.5.0:
+    dependencies:
+      apex-commons: 0.8.3
 
   aria-query@5.3.2: {}
 

@@ -6,6 +6,7 @@
   import BranchForm from "$lib/components/admin/branches/BranchForm.svelte";
   import AddCompanyCustomerModal from "$lib/components/admin/companies/AddCompanyCustomerModal.svelte";
   import AddCompanyInvestorModal from "$lib/components/admin/companies/AddCompanyInvestorModal.svelte";
+  import InvoicesTab from "$lib/components/admin/billing/InvoicesTab.svelte";
   import { getAdminClient } from "$graphql/client";
   import COMPANY_BY_ID from "$graphql/queries/companies/by_id.gql";
   import BRANCHES from "$graphql/queries/branches/branches.gql";
@@ -36,6 +37,8 @@
     company_investors_aggregate?: { aggregate?: { count?: number } };
     company_customers_aggregate?: { aggregate?: { count?: number } };
   };
+
+  type PaidAggregate = { aggregate?: { count?: number; sum?: { total?: number | null } } };
 
   type CompanyCustomerRow = {
     id: string;
@@ -68,10 +71,11 @@
   const companyId = $derived($page.params.id as string);
 
   let company = $state<CompanyDetail | null>(null);
+  let subscriptionPaid = $state<PaidAggregate | null>(null);
   let branches = $state<BranchRow[]>([]);
   let companyCustomers = $state<CompanyCustomerRow[]>([]);
   let investors = $state<InvestorRow[]>([]);
-  let activeTab = $state<"branches" | "customers" | "investors">("branches");
+  let activeTab = $state<"branches" | "customers" | "investors" | "invoices">("branches");
   let loading = $state(true);
   let customerLoading = $state(false);
   let investorLoading = $state(false);
@@ -116,11 +120,15 @@
 
   async function loadCompany() {
     try {
-      const result = await getAdminClient().query<{ companies_by_pk: CompanyDetail | null }>({
+      const result = await getAdminClient().query<{
+        companies_by_pk: CompanyDetail | null;
+        subscription_paid: PaidAggregate;
+      }>({
         query: COMPANY_BY_ID,
         variables: { id: companyId },
       });
       company = result.data?.companies_by_pk ?? null;
+      subscriptionPaid = result.data?.subscription_paid ?? null;
     } catch (e) {
       error = e instanceof Error ? e.message : "Failed to load company details.";
     }
@@ -252,13 +260,13 @@
     return agg?.aggregate?.count ?? 0;
   }
 
-  function setTab(tab: "branches" | "customers" | "investors") {
+  function setTab(tab: "branches" | "customers" | "investors" | "invoices") {
     activeTab = tab;
     if (tab === "branches") {
       loadBranches();
     } else if (tab === "customers") {
       loadCompanyCustomers();
-    } else {
+    } else if (tab === "investors") {
       loadInvestors();
     }
   }
@@ -521,7 +529,7 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 divide-y divide-border lg:grid-cols-3 lg:divide-x lg:divide-y-0">
+      <div class="grid grid-cols-1 divide-y divide-border lg:grid-cols-4 lg:divide-x lg:divide-y-0">
         <div class="p-6 text-center">
           <div class="text-3xl font-bold text-foreground">{count(company.branches_aggregate)}</div>
           <div class="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
@@ -538,6 +546,18 @@
           <div class="text-3xl font-bold text-foreground">{count(company.company_customers_aggregate)}</div>
           <div class="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
             <Icon iconName="icon/users" size={14} /> Customers
+          </div>
+        </div>
+        <div class="p-6 text-center">
+          <div class="text-3xl font-bold text-foreground">
+            {formatMoney(subscriptionPaid?.aggregate?.sum?.total ?? 0)}
+          </div>
+          <div class="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1.5">
+            <Icon iconName="icon/credit-card" size={14} /> Subscription Paid
+          </div>
+          <div class="text-[11px] text-muted-foreground mt-1">
+            {count(subscriptionPaid ?? undefined)}
+            {count(subscriptionPaid ?? undefined) === 1 ? "verified payment" : "verified payments"}
           </div>
         </div>
       </div>
@@ -580,6 +600,18 @@
           }`}
         >
           <Icon iconName="icon/users" size={16} /> Investors
+        </button>
+        <button
+          type="button"
+          data-tab="invoices"
+          onclick={() => setTab("invoices")}
+          class={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors ${
+            activeTab === "invoices"
+              ? "border-[#4D8DEE] text-[#4D8DEE]"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Icon iconName="icon/file-text" size={16} /> Invoices
         </button>
       </div>
 
@@ -880,6 +912,10 @@
               </div>
             {/if}
           </div>
+        </div>
+      {:else if activeTab === "invoices"}
+        <div class="p-4 min-h-[300px]">
+          <InvoicesTab {companyId} />
         </div>
       {:else}
         <div class="bg-card border border-border rounded-b-2xl shadow-sm min-h-[300px]">

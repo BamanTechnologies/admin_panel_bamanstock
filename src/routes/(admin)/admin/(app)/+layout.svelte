@@ -14,6 +14,7 @@
     SidebarTrigger,
   } from "$lib/components/ui/sidebar/index.js";
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { Popover, PopoverContent, PopoverTrigger } from "$lib/components/ui/popover/index.js";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
   import { themeStore } from "$lib/stores/theme.svelte.js";
@@ -26,6 +27,7 @@
 
   const profile = useAdminProfile();
   let loggingOut = $state(false);
+  let profileMenuOpen = $state(false);
 
   function toggleTheme() {
     themeStore.set(themeStore.current === "Dark" ? "Light" : "Dark");
@@ -110,8 +112,10 @@
         </div>
 
         <div class="flex items-center gap-4">
+          <!-- Hidden until notifications and quick settings are wired up.
           <Icon iconName="icon/bell"     size={20} class="text-muted-foreground cursor-pointer hover:text-foreground" />
           <Icon iconName="icon/settings" size={20} class="text-muted-foreground cursor-pointer hover:text-foreground" />
+          -->
 
           <button
             type="button"
@@ -130,26 +134,70 @@
             <span class="text-[7px] font-bold text-white leading-none">EN</span>
           </div>
 
-          <div class="flex items-center gap-3 pl-2 pr-1">
-            <div class="hidden sm:block text-right leading-tight">
-              <p class="text-sm font-bold text-foreground truncate max-w-[160px]">
-                {profile.name || 'Administrator'}
-              </p>
-              <p class="text-[11px] font-medium text-muted-foreground truncate max-w-[160px]">
-                {authStore.user?.role ?? ''}
-              </p>
-            </div>
-            <div
-              class="w-9 h-9 rounded-full bg-info/10 border-2 border-border flex items-center justify-center overflow-hidden shrink-0"
-              title={profile.email || profile.name}
+          <Popover bind:open={profileMenuOpen}>
+            <PopoverTrigger
+              class="flex items-center gap-3 pl-2 pr-1 py-1 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+              aria-label="Open profile menu"
             >
-              {#if profile.avatar}
-                <img src={profile.avatar} alt={profile.name} class="w-full h-full object-cover" />
-              {:else}
-                <span class="text-xs font-bold text-info">{profile.initials}</span>
-              {/if}
-            </div>
-          </div>
+              <div
+                class="w-9 h-9 rounded-full bg-info/10 border-2 border-border flex items-center justify-center overflow-hidden shrink-0"
+              >
+                {#if profile.avatar}
+                  <img src={profile.avatar} alt={profile.name} class="w-full h-full object-cover" />
+                {:else}
+                  <span class="text-xs font-bold text-info">{profile.initials}</span>
+                {/if}
+              </div>
+              <div class="hidden sm:block text-left leading-tight">
+                <p class="text-sm font-bold text-foreground truncate max-w-[160px]">
+                  {profile.name || 'Administrator'}
+                </p>
+                <p class="text-[11px] font-medium text-muted-foreground truncate max-w-[160px]">
+                  {authStore.user?.role ?? ''}
+                </p>
+              </div>
+              <Icon
+                iconName="icon/chevron-down"
+                size={14}
+                class="text-muted-foreground transition-transform {profileMenuOpen ? 'rotate-180' : ''}"
+              />
+            </PopoverTrigger>
+            <PopoverContent align="end" class="w-64 p-0 overflow-hidden">
+              <a
+                href="/admin/setting"
+                onclick={() => (profileMenuOpen = false)}
+                class="flex items-center gap-3 p-4 hover:bg-muted transition-colors"
+                title="Account settings"
+              >
+                <div
+                  class="w-10 h-10 rounded-full bg-info/10 border-2 border-border flex items-center justify-center overflow-hidden shrink-0"
+                >
+                  {#if profile.avatar}
+                    <img src={profile.avatar} alt={profile.name} class="w-full h-full object-cover" />
+                  {:else}
+                    <span class="text-xs font-bold text-info">{profile.initials}</span>
+                  {/if}
+                </div>
+                <div class="min-w-0 leading-tight">
+                  <p class="text-sm font-bold text-foreground truncate">{profile.name || 'Administrator'}</p>
+                  <p class="text-xs text-muted-foreground truncate" title={profile.email}>
+                    {profile.email || '—'}
+                  </p>
+                </div>
+              </a>
+              <div class="border-t border-border p-1.5">
+                <button
+                  type="button"
+                  onclick={handleLogout}
+                  disabled={loggingOut}
+                  class="w-full flex items-center gap-2.5 px-3 py-2 text-sm font-medium text-rose-500 hover:bg-rose-500/10 rounded-md transition-colors disabled:opacity-60"
+                >
+                  <Icon iconName="icon/log-out" size={16} />
+                  {loggingOut ? "Logging out..." : "Logout"}
+                </button>
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
       </header>
 

@@ -11,7 +11,9 @@
     type BillingInvoice,
   } from "$lib/billing/index.js";
 
-  let { onChanged = () => {} }: { onChanged?: () => void } = $props();
+  // When `companyId` is set the list is scoped to that company and the company
+  // column is hidden (used on the company detail page).
+  let { onChanged = () => {}, companyId }: { onChanged?: () => void; companyId?: string } = $props();
 
   let rows = $state<BillingInvoice[]>([]);
   let total = $state(0);
@@ -34,6 +36,7 @@
 
   function buildFilter(): Record<string, unknown> {
     const clauses: Record<string, unknown>[] = [{ is_deleted: { _eq: false } }];
+    if (companyId) clauses.push({ company_id: { _eq: companyId } });
     if (search.trim()) {
       const q = search.trim();
       clauses.push({
@@ -117,7 +120,7 @@
       />
       <input
         type="text"
-        placeholder="Search invoice number or company"
+        placeholder={companyId ? "Search invoice or transaction number" : "Search invoice number or company"}
         bind:value={search}
         oninput={handleSearchInput}
         class="w-full bg-background border border-border rounded-xl py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-info/20"
@@ -134,11 +137,13 @@
   <!-- Table -->
   <div class="border border-border rounded-2xl overflow-hidden bg-card">
     <div class="overflow-x-auto">
-      <table class="w-full text-sm min-w-[900px]">
+      <table class={`w-full text-sm ${companyId ? "min-w-[760px]" : "min-w-[900px]"}`}>
         <thead class="bg-muted/80 text-muted-foreground font-bold uppercase text-[11px] tracking-wider">
           <tr>
             <th class="px-5 py-4 text-left">Invoice #</th>
-            <th class="px-5 py-4 text-left">Company</th>
+            {#if !companyId}
+              <th class="px-5 py-4 text-left">Company</th>
+            {/if}
             <th class="px-5 py-4 text-left">Plan</th>
             <th class="px-5 py-4 text-left">Period</th>
             <th class="px-5 py-4 text-left">Total</th>
@@ -151,7 +156,9 @@
             {#each Array(5) as _}
               <tr class="animate-pulse">
                 <td class="px-5 py-4"><div class="w-32 h-3 rounded bg-muted"></div></td>
-                <td class="px-5 py-4"><div class="w-40 h-3 rounded bg-muted"></div></td>
+                {#if !companyId}
+                  <td class="px-5 py-4"><div class="w-40 h-3 rounded bg-muted"></div></td>
+                {/if}
                 <td class="px-5 py-4"><div class="w-32 h-3 rounded bg-muted"></div></td>
                 <td class="px-5 py-4"><div class="w-36 h-3 rounded bg-muted"></div></td>
                 <td class="px-5 py-4"><div class="w-24 h-3 rounded bg-muted"></div></td>
@@ -161,7 +168,7 @@
             {/each}
           {:else if rows.length === 0}
             <tr>
-              <td colspan="7" class="px-5 py-16 text-center">
+              <td colspan={companyId ? 6 : 7} class="px-5 py-16 text-center">
                 <Icon iconName="icon/file-text" size={24} class="text-muted-foreground inline mr-2" />
                 <span class="text-muted-foreground">
                   No invoices yet. Invoices are generated automatically when a payment is approved.
@@ -180,12 +187,14 @@
                     <span class="font-bold text-foreground">{invoice.invoice_number}</span>
                   </div>
                 </td>
-                <td class="px-5 py-4">
-                  <p class="font-semibold text-foreground truncate">{invoice.company?.name ?? "—"}</p>
-                  <p class="text-[11px] text-muted-foreground">
-                    TIN {invoice.tin_number ?? invoice.company?.tin_number ?? "—"}
-                  </p>
-                </td>
+                {#if !companyId}
+                  <td class="px-5 py-4">
+                    <p class="font-semibold text-foreground truncate">{invoice.company?.name ?? "—"}</p>
+                    <p class="text-[11px] text-muted-foreground">
+                      TIN {invoice.tin_number ?? invoice.company?.tin_number ?? "—"}
+                    </p>
+                  </td>
+                {/if}
                 <td class="px-5 py-4">
                   <p class="font-semibold text-foreground truncate">{plan?.pricing_plan?.name ?? "—"}</p>
                   <p class="text-[11px] text-muted-foreground">{frequencyLabel(plan?.frequency)}</p>

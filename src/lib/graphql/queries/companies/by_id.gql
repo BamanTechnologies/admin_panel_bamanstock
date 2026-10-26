@@ -39,4 +39,14 @@ query getCompanies($id: uuid!) {
       }
     }
   }
+  subscription_paid: billing_payments_aggregate(
+    where: { company_id: { _eq: $id }, is_verified: { _eq: true } }
+  ) {
+    aggregate {
+      count
+      sum {
+        total
+      }
+    }
+  }
 }
