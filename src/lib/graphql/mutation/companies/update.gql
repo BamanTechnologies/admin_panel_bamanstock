@@ -1,0 +1,25 @@
+mutation UpdateCompany(
+  $id: uuid!
+  $set: companies_set_input!
+  $investors: [company_investor_insert_input!]!
+  $customers: [company_customer_insert_input!]!
+) {
+  update_companies_by_pk(pk_columns: { id: $id }, _set: $set) {
+    id
+    license
+    name
+    tin_number
+  }
+  delete_company_investor(where: { company: { _eq: $id } }) {
+    affected_rows
+  }
+  insert_company_investor(objects: $investors) {
+    affected_rows
+  }
+  delete_company_customer(where: { company: { _eq: $id } }) {
+    affected_rows
+  }
+  insert_company_customer(objects: $customers) {
+    affected_rows
+  }
+}

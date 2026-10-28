@@ -1,0 +1,13 @@
+query getCustomers($limit: Int, $offset: Int, $filter: customers_bool_exp) {
+  customers(
+    limit: $limit
+    offset: $offset
+    where: $filter
+    order_by: [{ created_at: desc }]
+  ) {
+    id
+    first_name
+    last_name
+    phone_number
+  }
+}

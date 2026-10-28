@@ -1,0 +1,14 @@
+query getInvestors($limit: Int, $offset: Int, $filter: investor_bool_exp) {
+  investor(
+    limit: $limit
+    offset: $offset
+    where: $filter
+    order_by: [{ created_at: desc }]
+  ) {
+    id
+    first_name
+    last_name
+    phone_number
+    user_id
+  }
+}

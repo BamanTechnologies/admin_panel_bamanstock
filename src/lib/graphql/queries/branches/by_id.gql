@@ -1,0 +1,59 @@
+query getStocks($id: uuid!) {
+  branches_by_pk(id: $id) {
+    id
+    name
+    address
+    stocks_aggregate(where: { is_deleted: { _eq: false } }) {
+      aggregate {
+        sum {
+          selling_price
+        }
+      }
+    }
+    total_merchants: merchants_aggregate(
+      where: { orders: { is_deleted: { _eq: false } } }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    company: companyByCompany {
+      id
+      name
+    }
+  }
+  payment_aggregate(
+    where: {
+      order: {
+        _and: [
+          { merchant: { branch: { _eq: $id } } }
+          { is_deleted: { _eq: false } }
+        ]
+      }
+    }
+  ) {
+    aggregate {
+      sum {
+        amount
+      }
+    }
+  }
+  total_low_stock_products: products_aggregate(
+    where: {
+      _and: [
+        {
+          _or: [
+            { merchantByCreatedBy: { branch: { _eq: $id } } }
+            { branch_id: { _eq: $id } }
+          ]
+        }
+        { is_low_stock: { _eq: true } }
+        { is_deleted: { _eq: false } }
+      ]
+    }
+  ) {
+    aggregate {
+      count
+    }
+  }
+}

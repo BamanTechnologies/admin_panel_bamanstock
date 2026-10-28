@@ -1,0 +1,11 @@
+mutation updateProfile(
+  $id: uuid!
+  $object: account_users_set_input!
+) {
+  update_profile: update_account_users_by_pk(
+    pk_columns: { id: $id }
+    _set: $object
+  ) {
+    id
+  }
+}

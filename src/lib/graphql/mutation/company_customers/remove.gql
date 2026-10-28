@@ -1,0 +1,7 @@
+mutation deleteCompanyCustomer($customerId: uuid!, $companyId: uuid!) {
+  delete_company_customer(
+    where: { customer: { _eq: $customerId }, company: { _eq: $companyId } }
+  ) {
+    affected_rows
+  }
+}

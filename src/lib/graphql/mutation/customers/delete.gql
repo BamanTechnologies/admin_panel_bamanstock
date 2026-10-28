@@ -1,0 +1,5 @@
+mutation deleteCustomer($id: uuid!) {
+  delete_customers_by_pk(id: $id) {
+    id
+  }
+}

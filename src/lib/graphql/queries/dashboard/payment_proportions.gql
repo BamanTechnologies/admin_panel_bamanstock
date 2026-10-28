@@ -1,0 +1,12 @@
+query paymentProportions {
+  per_pricing_plan: admin_payment_per_pricing_plan_report {
+    label
+    total_payments
+    total_amount
+  }
+  per_frequency: admin_payment_per_frequency_report {
+    label
+    total_payments
+    total_amount
+  }
+}

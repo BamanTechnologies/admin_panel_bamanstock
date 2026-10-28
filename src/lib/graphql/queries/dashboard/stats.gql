@@ -1,0 +1,30 @@
+query dashboardStats {
+  total_companies: companies_aggregate {
+    aggregate {
+      count
+    }
+  }
+  active_companies: companies_aggregate(where: { has_active_subscription: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+  total_revenue: billing_payments_aggregate(where: { is_verified: { _eq: true } }) {
+    aggregate {
+      count
+      sum {
+        total
+      }
+    }
+  }
+  pending_payments: billing_payments_aggregate(
+    where: { is_verified: { _eq: false }, payment_status: { _neq: rejected } }
+  ) {
+    aggregate {
+      count
+      sum {
+        total
+      }
+    }
+  }
+}

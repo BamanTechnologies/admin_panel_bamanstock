@@ -1,0 +1,10 @@
+query frequencies(
+  $filter: billing_frequencies_bool_exp
+  $limit: Int
+  $offset: Int
+) {
+  billing_frequencies(where: $filter, limit: $limit, offset: $offset) {
+    display_order
+    name
+  }
+}
