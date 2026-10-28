@@ -1,5 +1,6 @@
 <script lang="ts">
   import Icon from "$lib/components/ui/Icon/index.js";
+  import { Button } from "$lib/components/ui/button/index.js";
   import { useAdminProfile } from "$lib/stores/profile.svelte.js";
   import { getAdminClient } from "$graphql/client";
   import DASHBOARD_STATS from "$graphql/queries/dashboard/stats.gql";
@@ -71,6 +72,10 @@
   let statsError = $state<string | null>(null);
   let statsData = $state<DashboardStats | null>(null);
 
+  function exportDashboard() {
+    window.print();
+  }
+
   async function loadStats() {
     statsLoading = true;
     statsError = null;
@@ -90,14 +95,18 @@
 </script>
 
 <svelte:head>
-  <title>Dashboard — BamanStock</title>
+  <title>Dashboard Analysis — BamanStock</title>
 </svelte:head>
 
-<div class="space-y-6 p-2">
+<div class="dashboard-page space-y-6 p-2">
   <div class="flex items-center justify-between mb-8">
     <h2 class="text-2xl font-semibold text-foreground">
       Welcome, {profile.name || 'Administrator'}
     </h2>
+    <Button variant="outline" onclick={exportDashboard} class="dashboard-export-button">
+      <Icon iconName="icon/download" size={16} />
+      Export PDF
+    </Button>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -136,3 +145,44 @@
 
   <ExpiringSubscriptions />
 </div>
+
+<style>
+  @media print {
+    @page {
+      size: A4 landscape;
+      margin: 12mm;
+    }
+
+    :global(body) {
+      background: white !important;
+    }
+
+    :global([data-sidebar="sidebar"]),
+    :global([data-sidebar="trigger"]),
+    :global(header) {
+      display: none !important;
+    }
+
+    :global(main) {
+      padding: 0 !important;
+    }
+
+    .dashboard-page {
+      padding: 0 !important;
+      color: #111827 !important;
+    }
+
+    .dashboard-export-button {
+      display: none !important;
+    }
+
+    :global(.dashboard-page .bg-card) {
+      break-inside: avoid;
+      box-shadow: none !important;
+    }
+
+    :global(.dashboard-page .grid) {
+      break-inside: avoid;
+    }
+  }
+</style>
