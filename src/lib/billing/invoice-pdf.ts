@@ -311,19 +311,36 @@ export function invoiceDocument(invoice: BillingInvoice): Record<string, unknown
   };
 }
 
-/**
- * Renders the invoice and hands the file to the browser.
- * Returns the file name that was downloaded.
- */
-export async function downloadInvoicePdf(invoice: BillingInvoice): Promise<string> {
+async function loadPdfMake() {
   const [{ default: pdfMake }, { default: vfs }] = await Promise.all([
     import("pdfmake/build/pdfmake"),
     import("pdfmake/build/vfs_fonts"),
   ]);
 
   pdfMake.addVirtualFileSystem(vfs);
+  return pdfMake;
+}
 
-  const filename = `invoice-${invoice.invoice_number}.pdf`;
+export function invoicePdfFileName(invoice: BillingInvoice): string {
+  return `invoice-${invoice.invoice_number}.pdf`;
+}
+
+/**
+ * Renders the invoice into memory. Used by the share flow, which uploads the
+ * bytes instead of downloading them.
+ */
+export async function invoicePdfBytes(invoice: BillingInvoice): Promise<Uint8Array> {
+  const pdfMake = await loadPdfMake();
+  return pdfMake.createPdf(invoiceDocument(invoice)).getBuffer();
+}
+
+/**
+ * Renders the invoice and hands the file to the browser.
+ * Returns the file name that was downloaded.
+ */
+export async function downloadInvoicePdf(invoice: BillingInvoice): Promise<string> {
+  const pdfMake = await loadPdfMake();
+  const filename = invoicePdfFileName(invoice);
   pdfMake.createPdf(invoiceDocument(invoice)).download(filename);
   return filename;
 }

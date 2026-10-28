@@ -5,9 +5,14 @@
     formatCurrency,
     formatDate,
     frequencyLabel,
+    invoiceShareText,
     type BillingInvoice,
   } from "$lib/billing/index.js";
-  import { downloadInvoicePdf } from "$lib/billing/invoice-pdf.js";
+  import {
+    downloadInvoicePdf,
+    invoicePdfBytes,
+  } from "$lib/billing/invoice-pdf.js";
+  import ShareLinkButton from "$lib/components/admin/share/ShareLinkButton.svelte";
 
   let {
     isOpen = $bindable(false),
@@ -18,6 +23,7 @@
 
   const plan = $derived(invoice?.pricing_plan_frequency_price);
   const company = $derived(invoice?.company);
+  const shareMessage = $derived(invoice ? invoiceShareText(invoice) : "BamanStock invoice");
 
   let downloading = $state(false);
   let downloadError = $state<string | null>(null);
@@ -213,6 +219,13 @@
           >
             <Icon iconName="icon/printer" size={16} /> Print
           </Button>
+          <ShareLinkButton
+            getBytes={() => invoicePdfBytes(invoice)}
+            message={shareMessage}
+            label="Share link"
+            title="Generate a Telegram or WhatsApp share link"
+            class="border-gray-300 text-gray-700 hover:bg-gray-100"
+          />
           <Button
             type="button"
             onclick={handleDownload}

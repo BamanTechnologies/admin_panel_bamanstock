@@ -203,6 +203,16 @@ export function paymentStatusLabel(status: string | null | undefined): string {
   return PAYMENT_STATUS_LABELS[status] ?? status.replace(/_/g, " ");
 }
 
+/** Message attached to the invoice's Telegram / WhatsApp share links. */
+export function invoiceShareText(invoice: BillingInvoice): string {
+  const parts = [
+    `Invoice ${invoice.invoice_number} from BamanStock`,
+    invoice.company?.name ?? "",
+    formatCurrency(invoice.total),
+  ].filter(Boolean);
+  return parts.join(" · ");
+}
+
 /** Human label for the `jsonb` rules blob attached to a plan frequency price. */
 export function rulesToEntries(
   rules: Record<string, unknown> | null | undefined
