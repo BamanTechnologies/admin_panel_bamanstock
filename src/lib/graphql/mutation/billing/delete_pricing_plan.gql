@@ -1,0 +1,10 @@
+mutation deletePricingPlan($id: uuid!) {
+  delete_billing_pricing_plan_frequency_prices(
+    where: { pricing_plan_id: { _eq: $id } }
+  ) {
+    affected_rows
+  }
+  delete_billing_pricing_plans(where: { id: { _eq: $id } }) {
+    affected_rows
+  }
+}

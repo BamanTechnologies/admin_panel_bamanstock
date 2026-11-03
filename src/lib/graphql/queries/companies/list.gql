@@ -1,0 +1,35 @@
+query getCompanies(
+  $limit: Int
+  $offset: Int
+  $filter: companies_bool_exp
+  $order: [companies_order_by!]
+) {
+  companies(where: $filter, limit: $limit, offset: $offset, order_by: $order) {
+    id
+    name
+    license
+    tin_number
+    created_at
+    updated_at
+    branches_aggregate {
+      aggregate {
+        count
+      }
+    }
+    company_investors_aggregate {
+      aggregate {
+        count
+      }
+    }
+    company_customers_aggregate {
+      aggregate {
+        count
+      }
+    }
+  }
+  total: companies_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

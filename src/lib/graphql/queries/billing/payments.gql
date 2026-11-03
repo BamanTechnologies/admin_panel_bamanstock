@@ -1,0 +1,64 @@
+query payments(
+  $filter: billing_payments_bool_exp
+  $limit: Int
+  $offset: Int
+  $order: [billing_payments_order_by]
+) {
+  billing_payments(
+    where: $filter
+    limit: $limit
+    offset: $offset
+    order_by: $order
+  ) {
+    id
+    auto_status
+    auto_transaction_message
+    created_at
+    is_verified
+    payment_date
+    payment_method
+    payment_status
+    reference_file
+    reference_id
+    subtotal
+    total
+    transaction_id
+    transaction_note
+    updated_at
+    vat
+    withholding
+    verified_by
+    verifier {
+      id
+      first_name
+      last_name
+      email
+      is_active
+      phone
+      profile_picture
+    }
+    company {
+      id
+      name
+      tin_number
+      license
+    }
+    pricing_plan_frequency_price {
+      id
+      price
+      frequency
+      rules
+      pricing_plan {
+        id
+        name
+        type
+        is_public
+      }
+    }
+  }
+  total: billing_payments_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+}

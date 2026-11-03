@@ -1,0 +1,19 @@
+query userById($id: uuid!) {
+  account_users_by_pk(id: $id) {
+    id
+    first_name
+    last_name
+    phone
+    email
+    profile_picture
+    telegram_chat_id
+    telegram_user_name
+    is_active
+    created_at
+    connect_telegram_url
+    updated_at
+    roles: user_roles {
+      role
+    }
+  }
+}

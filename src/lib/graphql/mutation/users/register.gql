@@ -1,0 +1,38 @@
+mutation registerUser(
+  $address: String
+  $email: String
+  $firstName: String!
+  $investorId: String
+  $branchId: String
+  $isActive: Boolean!
+  $isInvestor: Boolean!
+  $isMerchant: Boolean!
+  $isInvitation: Boolean!
+  $lastName: String
+  $password: String
+  $phone: String!
+  $profilePicture: String
+  $redirectUrl: String
+  $roles: [String!]!
+) {
+  register_user(
+    address: $address
+    email: $email
+    first_name: $firstName
+    investor_id: $investorId
+    is_active: $isActive
+    is_investor: $isInvestor
+    is_invitation: $isInvitation
+    last_name: $lastName
+    branch_id: $branchId
+    is_merchant: $isMerchant
+    password: $password
+    phone: $phone
+    profile_picture: $profilePicture
+    redirect_url: $redirectUrl
+    roles: $roles
+  ) {
+    message
+    status_code
+  }
+}

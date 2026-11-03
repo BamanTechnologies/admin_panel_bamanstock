@@ -1,0 +1,21 @@
+query expiringSubscriptions($until: date!) {
+  billing_subscriptions(
+    where: { is_active: { _eq: true }, end_date: { _lte: $until } }
+    order_by: { end_date: asc }
+  ) {
+    id
+    start_date
+    end_date
+    company {
+      id
+      name
+    }
+    pricing_plan_frequency_price {
+      frequency
+      price
+      pricing_plan {
+        name
+      }
+    }
+  }
+}

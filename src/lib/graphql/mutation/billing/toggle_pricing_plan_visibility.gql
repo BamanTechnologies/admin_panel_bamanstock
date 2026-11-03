@@ -1,0 +1,5 @@
+mutation togglePricingPlanVisibility($id: uuid!, $isPublic: Boolean!) {
+  update_billing_pricing_plans(where: { id: { _eq: $id } }, _set: { is_public: $isPublic }) {
+    affected_rows
+  }
+}

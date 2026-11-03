@@ -1,0 +1,9 @@
+query paymentMethods(
+  $filter: billing_payment_methods_bool_exp
+  $limit: Int
+  $offset: Int
+) {
+  billing_payment_methods(where: $filter, limit: $limit, offset: $offset) {
+    name
+  }
+}

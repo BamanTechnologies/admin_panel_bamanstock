@@ -1,0 +1,5 @@
+mutation updatePayment($id: uuid!, $set: billing_payments_set_input!) {
+  update_billing_payments_by_pk(pk_columns: { id: $id }, _set: $set) {
+    id
+  }
+}

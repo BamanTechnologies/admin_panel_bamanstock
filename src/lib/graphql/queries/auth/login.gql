@@ -1,0 +1,8 @@
+mutation Login($email: String, $password: String!, $phone: String) {
+  user_login(email: $email, password: $password, phone: $phone) {
+    token
+    status_code
+    refresh_token
+    message
+  }
+}

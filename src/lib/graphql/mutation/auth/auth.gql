@@ -1,0 +1,6 @@
+mutation changePassword($oldPassword: String!, $newPassword: String!) {
+  change_password(old_password: $oldPassword, new_password: $newPassword) {
+    message
+    status_code
+  }
+}

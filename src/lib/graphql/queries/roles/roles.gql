@@ -1,0 +1,5 @@
+query getRoles($filter: account_roles_bool_exp, $limit: Int, $offset: Int) {
+  account_roles(where: $filter, limit: $limit, offset: $offset) {
+    role
+  }
+}

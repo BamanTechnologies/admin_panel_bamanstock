@@ -1,0 +1,7 @@
+mutation removeInvestorFromCompany($companyId: uuid!, $investorId: uuid!) {
+  delete_company_investor(
+    where: { company: { _eq: $companyId }, investor: { _eq: $investorId } }
+  ) {
+    affected_rows
+  }
+}

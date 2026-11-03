@@ -1,0 +1,45 @@
+query pricingPlans(
+  $filter: billing_pricing_plan_frequency_prices_bool_exp
+  $limit: Int
+  $offset: Int
+  $order: [billing_pricing_plan_frequency_prices_order_by]
+) {
+  billing_pricing_plan_frequency_prices(
+    where: $filter
+    limit: $limit
+    offset: $offset
+    order_by: $order
+  ) {
+    id
+    price
+    rules
+    created_at
+    description
+    frequency
+    updated_at
+    pricing_plan {
+      id
+      name
+      is_public
+      type
+      description
+      created_at
+      updated_at
+    }
+  }
+  total: billing_pricing_plan_frequency_prices_aggregate(where: $filter) {
+    aggregate {
+      count
+    }
+  }
+  plans_total: billing_pricing_plans_aggregate {
+    aggregate {
+      count
+    }
+  }
+  plans_public: billing_pricing_plans_aggregate(where: { is_public: { _eq: true } }) {
+    aggregate {
+      count
+    }
+  }
+}

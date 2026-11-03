@@ -1,0 +1,5 @@
+mutation deletePayment($id: uuid!) {
+  delete_billing_payments(where: { id: { _eq: $id } }) {
+    affected_rows
+  }
+}

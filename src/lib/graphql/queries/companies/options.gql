@@ -1,0 +1,13 @@
+query companyOptions($filter: companies_bool_exp, $limit: Int, $offset: Int) {
+  companies(
+    where: $filter
+    limit: $limit
+    offset: $offset
+    order_by: [{ name: asc }]
+  ) {
+    id
+    name
+    tin_number
+    license
+  }
+}

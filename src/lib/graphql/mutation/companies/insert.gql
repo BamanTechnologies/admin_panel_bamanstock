@@ -1,0 +1,8 @@
+mutation InsertCompany($input: companies_insert_input!) {
+  insert_companies_one(object: $input) {
+    id
+    license
+    name
+    tin_number
+  }
+}

@@ -1,0 +1,5 @@
+mutation insertPayment($object: billing_payments_insert_input!) {
+  insert_billing_payments_one(object: $object) {
+    id
+  }
+}

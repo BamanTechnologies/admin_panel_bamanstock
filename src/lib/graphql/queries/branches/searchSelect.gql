@@ -1,0 +1,12 @@
+query getBranchSearch($filter: branches_bool_exp, $limit: Int, $offset: Int) {
+  branches(limit: $limit, offset: $offset, where: $filter) {
+    id
+    name
+    address
+    company: companyByCompany {
+      id
+      name
+      tin_number
+    }
+  }
+}

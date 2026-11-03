@@ -1,0 +1,5 @@
+mutation deleteBranch($id: uuid!) {
+  delete_branches_by_pk(id: $id) {
+    id
+  }
+}
