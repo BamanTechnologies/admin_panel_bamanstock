@@ -102,6 +102,7 @@ const icon = {
 	'icon/shield': () => import('@lucide/svelte/icons/shield'),
 	'icon/shield-check': () => import('@lucide/svelte/icons/shield-check'),
 	'icon/lock': () => import('@lucide/svelte/icons/lock'),
+	'icon/key-round': () => import('@lucide/svelte/icons/key-round'),
 	'icon/help-circle': () => import('@lucide/svelte/icons/help-circle'),
 	'icon/send': () => import('@lucide/svelte/icons/send'),
 	'icon/sun': () => import('@lucide/svelte/icons/sun'),

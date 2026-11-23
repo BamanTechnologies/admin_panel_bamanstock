@@ -4,6 +4,7 @@
   import { fade } from "svelte/transition";
   import ConfirmModal from "$lib/components/ui/ConfirmModal.svelte";
   import ResetPassword from "$lib/components/admin/ResetPassword.svelte";
+  import ChangePasswordModal from "$lib/components/admin/ChangePasswordModal.svelte";
   import RegisterUser from "$lib/components/admin/RegisterUser.svelte";
   import { getAdminClient } from "$graphql/client";
   import LIST_USERS from "$graphql/queries/users/list.gql";
@@ -52,6 +53,8 @@
   let confirmToggleOpen = $state(false);
   let isResetModalOpen = $state(false);
   let isRegisterOpen = $state(false);
+  let isChangePasswordOpen = $state(false);
+  let changePasswordUser = $state<UserRow | null>(null);
   let confirmActionLoading = $state(false);
   let confirmError = $state<string | null>(null);
 
@@ -485,6 +488,13 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <button
+                  title="Change password"
+                  onclick={() => { changePasswordUser = u; isChangePasswordOpen = true; }}
+                  class="p-1.5 text-muted-foreground hover:text-blue-500"
+                >
+                  <Icon iconName="icon/key-round" size={16} />
+                </button>
+                <button
                   title="Reset password"
                   onclick={() => { isResetModalOpen = true; }}
                   class="p-1.5 text-muted-foreground hover:text-blue-500"
@@ -588,6 +598,13 @@
   onConfirm={confirmToggle}
 />
 <ResetPassword bind:isOpen={isResetModalOpen} onConfirm={() => { isResetModalOpen = false; }} />
+<ChangePasswordModal
+  bind:isOpen={isChangePasswordOpen}
+  userId={changePasswordUser?.id ?? ""}
+  userLabel={changePasswordUser ? fullName(changePasswordUser) : "this user"}
+  onClose={() => { changePasswordUser = null; }}
+  onSuccess={() => { changePasswordUser = null; }}
+/>
 <RegisterUser bind:isOpen={isRegisterOpen} onSuccess={() => loadData()} />
 
 <style>
